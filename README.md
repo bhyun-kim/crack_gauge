@@ -1,2 +1,2 @@
 # crack_gauge
-Open Source Project for Concrete Damage Detection
+UOS Project for Concrete Damage Detection
