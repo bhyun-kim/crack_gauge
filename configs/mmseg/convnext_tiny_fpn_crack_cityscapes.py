@@ -4,11 +4,14 @@ _base_ = [
     '../../mmsegmentation/configs/_base_/schedules/schedule_20k.py'
 ]
 
-crop_size = (1024, 1024)
+crop_size = (2560, 2560)
 norm_cfg = dict(type='SyncBN', requires_grad=True)
 model = dict(
     data_preprocessor=dict(size=crop_size),
-    decode_head=dict(num_classes=5))
+    decode_head=dict(
+        num_classes=2,
+        loss_decode=dict(class_weight=[10., 20.]),
+        ))
 
 optim_wrapper = dict(
     _delete_=True,
@@ -30,31 +33,31 @@ param_scheduler = [
         type='PolyLR',
         power=1.0,
         begin=1500,
-        end=160000,
+        end=80000,
         eta_min=0.0,
         by_epoch=False,
     )
 ]
 
-dataset_type = 'ConcreteDamageDataset'
+dataset_type = 'CrackCityscapesDataset'
  
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations'),
     dict(
         type='RandomResize', 
-        scale=(1024, 1024),
+        scale=(2560, 2560),
         ratio_range=(0.5, 2.0),
         keep_ratio=True),
     dict(type='RandomFlip', prob=0.5),
-    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.85),
+    dict(type='RandomCrop', crop_size=crop_size),
     dict(type='PhotoMetricDistortion'),
     dict(type='PackSegInputs'),
 ]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=(1024, 1024), keep_ratio=False),
+    dict(type='Resize', scale=(2560, 2560), keep_ratio=True),
     dict(type='LoadAnnotations'),
     dict(type='PackSegInputs')
 ]
@@ -62,14 +65,13 @@ test_pipeline = [
 img_ratios = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
 
 label_map = {
-    1:0,
-    2:1,
-    3:2,
-    4:3,
-    5:3,
-    6:1,
-    7:4,
-    8:4,
+    2:0,
+    3:0,
+    4:0,
+    5:0,
+    6:0,
+    7:0,
+    8:0,
 }
 
 general_concrete_damage_root='/home/user/#data/2023.03.25 General Concrete Damage Training/v0.1.1'
@@ -186,7 +188,7 @@ test_dataloader = dict(
 val_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU'])
 test_evaluator = val_evaluator
 
-work_dir = '/media/user/WDS/#checkpoints/023. KCQR/convnext_tiny_fpn_kcqr_concrete_area_damage'
+work_dir = '/media/user/WDS/#checkpoints/023. KCQR/convnext_tiny_fpn_kcqr_crack_cityscapes'
 default_hooks = dict(
     checkpoint=dict(type='CheckpointHook', by_epoch=False, interval=500)
     )

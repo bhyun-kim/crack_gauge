@@ -1,13 +1,11 @@
-import numpy as np
-
 import mmcv
-
+import numpy as np
+from mmengine import FileClient, track_iter_progress
+from mmseg import registry
 from mmseg.datasets.cityscapes import CityscapesDataset
-from mmseg.registry import DATASETS
 
-from mmengine import track_iter_progress, FileClient
 
-@DATASETS.register_module()
+@registry.DATASETS.register_module()
 class ConcreteDamageDataset(CityscapesDataset):
     """Concrete Damage Dataset using Cityscaps Dataset Format
     
@@ -16,7 +14,7 @@ class ConcreteDamageDataset(CityscapesDataset):
     """
     METAINFO = dict(
         classes=('background', 'efflorescence', 'rebar_exposure', 'spalling', 'corrosion'),
-        palette=[[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 255, 255], [255, 0, 255]]
+        palette=[[0, 0, 0], [0, 255, 0], [0, 255, 255], [255, 0, 255], [255, 165, 0]]
     )
 
     def __init__(self,
