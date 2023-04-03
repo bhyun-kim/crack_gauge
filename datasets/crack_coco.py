@@ -1,9 +1,8 @@
+from mmdet import registry
 from mmdet.datasets.coco import CocoDataset
 
-from mmdet.registry import DATASETS
 
-
-@DATASETS.register_module()
+@registry.DATASETS.register_module()
 class ConcreteCrackCOCODataset(CocoDataset):
     """Concrete Crack COCO Dataset"""
 
