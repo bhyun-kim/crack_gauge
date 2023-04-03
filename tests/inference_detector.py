@@ -11,6 +11,11 @@ import numpy as np
 import slidingwindow as sw
 from mmdet.apis import inference_detector, init_detector
 
+import sys
+sys.path.append('..')
+
+from datasets import *
+
 
 def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 0.1, window_size = 1024, overlap_ratio = 0.5, alpha=0.6):
 
@@ -38,32 +43,30 @@ def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 
 
     # Generate the set of windows, with a 256-pixel max window size and 50% overlap
     windows = sw.generate(img, sw.DimOrder.HeightWidthChannel, window_size, overlap_ratio)
-    mask_output = np.zeros((img.shape[0], img.shape[1]), dtype=np.bool)
+    mask_output = np.zeros((img.shape[0], img.shape[1]), dtype=bool)
 
 
-    for window in mmengine.track_progress(windows, ascii = True, desc = 'inference by sliding window on ' + os.path.basename(input_img)):
+    for window in mmengine.track_iter_progress(windows):
         # Add print option for sliding window detection
         img_subset = img[window.indices()]
         results = inference_detector(model, img_subset)
-        bbox_result, segm_result = results
-        mask_sum = np.zeros((img_subset.shape[0], img_subset.shape[1]), dtype=np.bool)
-        bboxes = np.vstack(bbox_result) # bboxes
+        bbox_result = results.pred_instances.bboxes
+        segm_result = results.pred_instances.masks
 
-        # draw segmentation masks
-        if segm_result is not None:
-            segms = mmcv.concat_list(segm_result)
-            inds = np.where(bboxes[:, -1] > score_thr)[0]
-            
-            for i in inds:
-                mask = segms[i]
-                mask_sum = mask_sum + mask
+        mask_sum = np.zeros((img_subset.shape[0], img_subset.shape[1]), dtype=bool)
+
+        if len(bbox_result) > 0 :
+            for idx, bbox in enumerate(bbox_result):
+                if results.pred_instances.scores[idx] > score_thr:
+                    mask = segm_result[idx].cpu().numpy()
+                    mask_sum = mask_sum + mask
 
         mask_output[window.indices()] = mask_sum
 
     mask_output = mask_output.astype(np.uint8)
     mask_output[mask_output > 1] = 1
 
-    mask_output_bool = mask_output.astype(np.bool)
+    mask_output_bool = mask_output.astype(bool)
 
     # Add colors to detection result on img
     img_result = img
@@ -95,7 +98,7 @@ def main():
     color_mask = np.array([[255, 0, 0]])
     img_list = glob(os.path.join(args.srx_dir, f'*{args.srx_suffix}'))
 
-    for img_path in mmengine.track_progress(img_list):
+    for img_path in mmengine.track_iter_progress(img_list):
 
         img_result, mask_output = inference_detector_sliding_window(model, img_path, color_mask,                                  score_thr = 0.1, window_size = 1024, overlap_ratio=0.1,)
         rst_name = os.path.basename(img_path).replace(args.srx_suffix, args.rst_suffix)
