@@ -12,7 +12,7 @@ import slidingwindow as sw
 from mmseg.apis import init_model, inference_model
 
 from skimage.morphology import medial_axis
-from skimage.measure import label 
+from skimage.measure import label, regionprops_table
 
 import cv2
 
@@ -92,35 +92,140 @@ def inference_segmentor_sliding_window(model, input_img, color_mask, score_thr =
     return img_result, mask_output
 
 
-
-
-def quantify_crack_width_length(mask_output):
+def connect_cracks(mask_output, epsilon = 50):
     """
-    Quantify crack width and length
+    Connect cracks by using medial axis
 
     Args:
         mask_output (ndarray): The result mask. The shape is (H, W).
 
     Returns:
+        mask_output (ndarray): The result mask. The shape is (H, W).
+    """
+
+    # label each crack
+    labels, num = label(mask_output, connectivity=2, return_num=True)
+    # get information of each crack area
+    crack_region_table = regionprops_table(labels, properties=('label', 'bbox', 'coords', 'orientation'))
+
+    width = crack_region_table['bbox-3'] - crack_region_table['bbox-1']
+    height = crack_region_table['bbox-2'] - crack_region_table['bbox-0']
+
+    crack_region_table['is_horizontal'] = width > height
+
+    connecting_directions = ['x_axis', 'y_axis']
+    connect_line_img = np.zeros_like(mask_output, dtype=np.uint8)
+
+    for connecting_direction in connecting_directions:
+
+        e2_list = []
+        e1_list = []
+
+        for crack_num, crack_region in enumerate(crack_region_table['label']):
+
+            min_row = crack_region_table['bbox-0'][crack_num]
+            min_col = crack_region_table['bbox-1'][crack_num]
+            max_row = crack_region_table['bbox-2'][crack_num] - 1
+            max_col = crack_region_table['bbox-3'][crack_num] - 1
+
+            if crack_region_table['is_horizontal'][crack_num]:
+                # max col / min col
+                col = crack_region_table['coords'][crack_num][:, 1]
+
+                e2 = crack_region_table['coords'][crack_num][np.argwhere(col == max_col), :][-1][0]
+                e1 = crack_region_table['coords'][crack_num][np.argwhere(col == min_col), :][0][0]
+
+                if connecting_direction == 'y_axis' and e2[0] < e1[0]:
+                    e2, e1 = e1, e2
+
+                e2_list.append(e2)
+                e1_list.append(e1)
+
+            else:
+                # max row / min row
+                row = crack_region_table['coords'][crack_num][:, 0]
+
+                e2 = crack_region_table['coords'][crack_num][np.argwhere(row == max_row), :][-1][0]
+                e1 = crack_region_table['coords'][crack_num][np.argwhere(row == min_row), :][0][0]
+
+                if connecting_direction == 'x_axis' and e2[1] < e1[1]:
+                    e2, e1 = e1, e2
+
+                e2_list.append(e2)
+                e1_list.append(e1)
+
+        crack_region_table['e2'] = e2_list
+        crack_region_table['e1'] = e1_list
+
+
+        n = len(crack_region_table['label'])
+        color = (1)  # binary image
+
+
+        for num_e2, e2 in enumerate(crack_region_table['e2']):
+
+            connect_candidates_e2 = []
+            connect_candidates_e1 = []
+            distance_list = []
+
+            for num_e1, e1 in enumerate(crack_region_table['e1']):
+
+                if num_e2 != num_e1:
+                    d = np.subtract(e1, e2)
+                    distance = np.sqrt(d[0] ** 2 + d[1] ** 2)
+
+                    if (distance < epsilon):
+                        distance_list.append(distance)
+                        connect_candidates_e2.append(tuple(e2[::-1]))
+                        connect_candidates_e1.append(tuple(e1[::-1]))
+
+            if distance_list :
+                connect_idx = np.argmin(distance_list)
+                connect_e2 = connect_candidates_e2[connect_idx]
+                connect_e1 = connect_candidates_e1[connect_idx]
+                connect_line_img = cv2.line(connect_line_img, connect_e2, connect_e1, color, 8)
+
+    mask_output = mask_output + connect_line_img
+    mask_output[mask_output > 1] = 1
+
+    return mask_output
+
+def create_distance_map(mask):
+    """
+    Create distance map from mask
+
+    Args:
+        mask (ndarray): The mask image. The shape is (H, W).
+
+    Returns:
+        distance_map (ndarray): The distance map. The shape is (H, W).
+    """
+
+    dist, skel = medial_axis(mask, return_distance=True)
+    distance_map = dist * skel
+
+    return distance_map
+
+
+def quantify_crack_width_length(crack_mask, distance_map):
+    """
+    Quantify crack width and length
+
+    Args: 
+        crack_mask (ndarray): The crack mask image. The shape is (H, W).
+        distance_map (ndarray): The distance map. The shape is (H, W).
+
+    Returns:
         crack_width (float): The crack width.
         crack_length (float): The crack length.
     """
+    crack_distance_map = distance_map * crack_mask
 
-    # assert mask output is binary, i.e. 0 or 1
-    assert np.unique(mask_output).size == 2, 'Mask output should be binary.'
+    crack_width = np.mean(crack_distance_map[crack_distance_map > 0])
 
-    mask_medial_axis, distance = medial_axis(mask_output, return_distance=True)
+    crack_length = np.sum(crack_distance_map > 0)
 
-    dist_on_skel = distance * mask_medial_axis
-
-    crack_width = np.mean(dist_on_skel)
-
-    crack_length = np.sum(mask_medial_axis)
-    
     return crack_width, crack_length
-
-
-
 
 def main():
     args = parse_args()
@@ -140,20 +245,42 @@ def main():
         rst_path = os.path.join(args.rst_dir, rst_name)
         mask_path = os.path.join(args.rst_dir, mask_name)
 
+        # create distance map
+        distance_map = create_distance_map(mask_output)
+                
         # label mask 
+        mask_output = connect_cracks(mask_output)
         mask_label = label(mask_output)
+        # regionprops_table
+        crack_region_table = regionprops_table(mask_label)
 
         # loop through each crack
         for crack_id in np.unique(mask_label)[1:]:
             crack_mask = mask_label == crack_id
 
-            if np.sum(crack_mask) < 50:
+            if np.sum(crack_mask) < 500:
                 continue
 
-            crack_width, crack_length = quantify_crack_width_length(crack_mask)
+            crack_width, crack_length = quantify_crack_width_length(crack_mask, distance_map)
+
+            # get crack x, y   
+            crack_num = crack_id - 1
+
+            minr = crack_region_table['bbox-0'][crack_num]
+            minc = crack_region_table['bbox-1'][crack_num]
+            maxr = crack_region_table['bbox-2'][crack_num]
+            maxc = crack_region_table['bbox-3'][crack_num]
+
+            # clip minr, minc, maxr, maxc
+            textr = max(minr, 20)
+            textc = max(minc, 20)
 
             # display on image
-            img_result = cv2.putText(img_result, f'Crack: {crack_width:.2f} x {crack_length:.2f}', (10, 10 + crack_id * 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+            img_result = cv2.putText(
+                img_result, f'Crack: {crack_width:.2f} x {crack_length:.2f}', (textc, textr), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+            
+            # put rectangle on crack
+            img_result = cv2.rectangle(img_result, (minc, minr), (maxc, maxr), (0, 0, 255), 1)
 
         os.makedirs(args.rst_dir, exist_ok=True)
 
