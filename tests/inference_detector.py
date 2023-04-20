@@ -16,6 +16,18 @@ sys.path.append('..')
 
 from datasets import *
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Inference detector')
+    parser.add_argument('--config', help='the config file to inference')
+    parser.add_argument('--checkpoint', help='the checkpoint file to inference')
+    parser.add_argument('--srx_dir', help='the dir to inference')
+    parser.add_argument('--rst_dir', help='the dir to save result')
+    parser.add_argument('--srx_suffix', default='.png', help='the source image extension')
+    parser.add_argument('--rst_suffix', default='.png', help='the result image extension')
+    parser.add_argument('--mask_suffix', default='.png', help='the mask output extension')
+
+    args = parser.parse_args()
+    return args
 
 def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 0.1, window_size = 1024, overlap_ratio = 0.5, alpha=0.6):
 
@@ -43,7 +55,7 @@ def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 
 
     # Generate the set of windows, with a 256-pixel max window size and 50% overlap
     windows = sw.generate(img, sw.DimOrder.HeightWidthChannel, window_size, overlap_ratio)
-    mask_output = np.zeros((img.shape[0], img.shape[1]), dtype=bool)
+    mask_output = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
 
 
     for window in mmengine.track_iter_progress(windows):
@@ -53,17 +65,17 @@ def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 
         bbox_result = results.pred_instances.bboxes
         segm_result = results.pred_instances.masks
 
-        mask_sum = np.zeros((img_subset.shape[0], img_subset.shape[1]), dtype=bool)
+        mask_sum = np.zeros((img_subset.shape[0], img_subset.shape[1]), dtype=np.uint8)
 
         if len(bbox_result) > 0 :
             for idx, bbox in enumerate(bbox_result):
                 if results.pred_instances.scores[idx] > score_thr:
                     mask = segm_result[idx].cpu().numpy()
+                    mask = np.squeeze(mask)
                     mask_sum = mask_sum + mask
 
-        mask_output[window.indices()] = mask_sum
+        mask_output[window.indices()] += mask_sum
 
-    mask_output = mask_output.astype(np.uint8)
     mask_output[mask_output > 1] = 1
 
     mask_output_bool = mask_output.astype(bool)
@@ -75,37 +87,26 @@ def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 
     return img_result, mask_output
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Inference detector')
-    parser.add_argument('--config', help='the config file to inference')
-    parser.add_argument('--checkpoint', help='the checkpoint file to inference')
-    parser.add_argument('--srx_dir', help='the dir to inference')
-    parser.add_argument('--rst_dir', help='the dir to save result')
-    parser.add_argument('--srx_suffix', default='.png', help='the source image extension')
-    parser.add_argument('--rst_suffix', default='.png', help='the result image extension')
-    parser.add_argument('--mask_suffix', default='.png', help='the mask output extension')
-
-    args = parser.parse_args()
-    return args
-
-
 def main():
     args = parse_args()
 
     # build the model from a config file and a checkpoint file
     model = init_detector(args.config, args.checkpoint, device='cuda:0')
     # get palette 
-    color_mask = np.array([[255, 0, 0]])
+    color_mask = np.array([[0, 0, 255]])
     img_list = glob(os.path.join(args.srx_dir, f'*{args.srx_suffix}'))
 
     for img_path in mmengine.track_iter_progress(img_list):
 
-        img_result, mask_output = inference_detector_sliding_window(model, img_path, color_mask,                                  score_thr = 0.1, window_size = 1024, overlap_ratio=0.1,)
+        img_result, mask_output = inference_detector_sliding_window(model, img_path, color_mask, score_thr = 0.1, window_size = 1024, overlap_ratio=0.3)
         rst_name = os.path.basename(img_path).replace(args.srx_suffix, args.rst_suffix)
         mask_name = os.path.basename(img_path).replace(args.srx_suffix, args.mask_suffix)
 
         rst_path = os.path.join(args.rst_dir, rst_name)
         mask_path = os.path.join(args.rst_dir, mask_name)
+
+        # make result dir
+        os.makedirs(args.rst_dir, exist_ok=True)
 
         mmcv.imwrite(img_result, rst_path)
         mmcv.imwrite(mask_output, mask_path)
