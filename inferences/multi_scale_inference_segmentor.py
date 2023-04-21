@@ -60,13 +60,15 @@ def main():
     img_list = glob(os.path.join(args.srx_dir, f'*{args.srx_suffix}'))
 
     crack_palette=crack_model.dataset_meta['palette'][:2] # only keep the first two colors, we usally assign the first color to background and the second color to crack
-    if args.overwrite_crack_palette:
-        crack_palette = [[0, 0, 0], [0, 0, 255]] # we use black and white to represent crack and background
+    
     deterio_palette=deterio_model.dataset_meta['palette']
     palette = crack_palette + deterio_palette[1:]
 
     if args.rgb_to_bgr:
         palette = [p[::-1] for p in palette]
+
+    if args.overwrite_crack_palette:
+        palette[1] = [0, 0, 255] # we use black and white to represent crack and background
 
     classes = crack_model.dataset_meta['classes'] + deterio_model.dataset_meta['classes'][1:]
 
