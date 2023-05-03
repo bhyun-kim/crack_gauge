@@ -83,7 +83,6 @@ def main():
 
         # increase the deteroration mask by 1, so that the crack mask can be added to it. 
         mask_result[mask_result > 0] += 1
-
         mask_result[crack_mask == 1] = 1
 
         seg_result = mmcv.imread(img_path)
