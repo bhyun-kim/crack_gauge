@@ -7,8 +7,11 @@ class CrackCityscapesDataset(ConcreteDamageDataset):
     
     The ``img_suffix`` is fixed to '_leftImg8bit.png' and ``seg_map_suffix`` is
     fixed to '_gtFine_labelIds.png' for Concrete Damage Dataset. 
+
+    !!!CAUTION!!!
+    The palette is BGR, not RGB
     """
     METAINFO = dict(
         classes=('background', 'crack'),
-        palette=[[0, 0, 0], [255, 0, 0]]
+        palette=[[0, 0, 0], [0, 0, 255]]
     )

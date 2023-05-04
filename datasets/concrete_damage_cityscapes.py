@@ -11,10 +11,14 @@ class ConcreteDamageDataset(CityscapesDataset):
     
     The ``img_suffix`` is fixed to '_leftImg8bit.png' and ``seg_map_suffix`` is
     fixed to '_gtFine_labelIds.png' for Concrete Damage Dataset. 
+
+    !!!CAUTION!!!
+    The palette is BGR, not RGB
     """
+
     METAINFO = dict(
         classes=('background', 'efflorescence', 'rebar_exposure', 'spalling', 'corrosion'),
-        palette=[[0, 0, 0], [0, 255, 0], [0, 255, 255], [255, 0, 255], [255, 165, 0]]
+        palette=[[0, 0, 0], [0, 255, 0], [255, 255, 0], [255, 0, 255], [0, 165, 255]]
     )
 
     def __init__(self,
