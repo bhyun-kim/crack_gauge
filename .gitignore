@@ -130,3 +130,5 @@ dmypy.json
 
 work_dirs/
 configs/kepco
+demo/
+tests/cmd.sh

@@ -16,7 +16,6 @@ sys.path.append('..')
 
 from datasets import *
 
-<<<<<<< HEAD
 def parse_args():
     parser = argparse.ArgumentParser(description='Inference detector')
     parser.add_argument('--config', help='the config file to inference')
@@ -29,8 +28,6 @@ def parse_args():
 
     args = parser.parse_args()
     return args
-=======
->>>>>>> e090ab2467f495b11c3e47ad91409de5c515e53a
 
 def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 0.1, window_size = 1024, overlap_ratio = 0.5, alpha=0.6):
 
@@ -58,11 +55,7 @@ def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 
 
     # Generate the set of windows, with a 256-pixel max window size and 50% overlap
     windows = sw.generate(img, sw.DimOrder.HeightWidthChannel, window_size, overlap_ratio)
-<<<<<<< HEAD
     mask_output = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
-=======
-    mask_output = np.zeros((img.shape[0], img.shape[1]), dtype=bool)
->>>>>>> e090ab2467f495b11c3e47ad91409de5c515e53a
 
 
     for window in mmengine.track_iter_progress(windows):
@@ -72,29 +65,17 @@ def inference_detector_sliding_window(model, input_img, color_mask, score_thr = 
         bbox_result = results.pred_instances.bboxes
         segm_result = results.pred_instances.masks
 
-<<<<<<< HEAD
         mask_sum = np.zeros((img_subset.shape[0], img_subset.shape[1]), dtype=np.uint8)
-=======
-        mask_sum = np.zeros((img_subset.shape[0], img_subset.shape[1]), dtype=bool)
->>>>>>> e090ab2467f495b11c3e47ad91409de5c515e53a
 
         if len(bbox_result) > 0 :
             for idx, bbox in enumerate(bbox_result):
                 if results.pred_instances.scores[idx] > score_thr:
                     mask = segm_result[idx].cpu().numpy()
-<<<<<<< HEAD
                     mask = np.squeeze(mask)
                     mask_sum = mask_sum + mask
 
         mask_output[window.indices()] += mask_sum
 
-=======
-                    mask_sum = mask_sum + mask
-
-        mask_output[window.indices()] = mask_sum
-
-    mask_output = mask_output.astype(np.uint8)
->>>>>>> e090ab2467f495b11c3e47ad91409de5c515e53a
     mask_output[mask_output > 1] = 1
 
     mask_output_bool = mask_output.astype(bool)
