@@ -132,3 +132,8 @@ work_dirs/
 configs/kepco
 demo/
 tests/cmd.sh
+configs/mmseg/convnext_tiny_fpn_crack_cityscapes.py
+configs/mmdet/cascade-mask-rcnn_r50_fpn_2x_coco_crack.py
+configs/mmdet/cascade-mask-rcnn_x101-64x4d_fpn_2x_coco_crack_negative.py
+configs/mmdet/cascade-mask-rcnn_x101-64x4d_fpn_2x_coco_pure_positive.py
+configs/mmseg/convnext_tiny_fpn_crack_cityscapes.py
