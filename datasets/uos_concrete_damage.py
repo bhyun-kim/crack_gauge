@@ -6,8 +6,10 @@ from mmseg.datasets.cityscapes import CityscapesDataset
 
 
 @registry.DATASETS.register_module()
-class ConcreteDamageDataset(CityscapesDataset):
-    """Concrete Damage Dataset using Cityscaps Dataset Format
+class UOSConcreteDamageDataset(CityscapesDataset):
+    """University of Seoul Concrete Damage Dataset 
+
+    This dataset follows the same format as Cityscapes.
     
     The ``img_suffix`` is fixed to '_leftImg8bit.png' and ``seg_map_suffix`` is
     fixed to '_gtFine_labelIds.png' for Concrete Damage Dataset. 

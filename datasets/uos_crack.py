@@ -1,9 +1,10 @@
 from mmseg import registry
-from .concrete_damage_cityscapes import ConcreteDamageDataset
+from .uos_concrete_damage import UOSConcreteDamageDataset
 
 @registry.DATASETS.register_module()
-class CrackCityscapesDataset(ConcreteDamageDataset):
-    """Concrete Crack Dataset using Cityscaps Dataset Format
+class UOSCrackDataset(UOSConcreteDamageDataset):
+    """University of Concrete Crack Dataset
+    This dataset follows the same format as Cityscapes.
     
     The ``img_suffix`` is fixed to '_leftImg8bit.png' and ``seg_map_suffix`` is
     fixed to '_gtFine_labelIds.png' for Concrete Damage Dataset. 

@@ -1,7 +1,7 @@
-from .concrete_crack_cityscapes import CrackCityscapesDataset
-from .concrete_damage_cityscapes import ConcreteDamageDataset
+from .uos_crack import UOSCrackDataset
+from .uos_concrete_damage import UOSConcreteDamageDataset
 from .crack_coco import ConcreteCrackCOCODataset
 
 __all__ = [
-    'ConcreteDamageDataset', 'ConcreteCrackCOCODataset', 'CrackCityscapesDataset'
+    'ConcreteCrackCOCODataset', 'UOSConcreteDamageDataset', 'UOSCrackDataset'
 ]
