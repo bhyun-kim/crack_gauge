@@ -47,3 +47,13 @@ Step 4. Install Crack-Gauge:
 ```bash
 python setup.py develop
 ```
+
+
+## Additional dependencies for specific applications
+
+1. Web Demo powered by Streamlit :
+    
+```bash
+pip install streamlit
+pip install streamlit-image-comparison
+```
