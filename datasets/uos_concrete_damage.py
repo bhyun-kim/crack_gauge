@@ -12,31 +12,31 @@ class UOSConcreteDamageDataset(CityscapesDataset):
     This dataset follows the same format as Cityscapes.
     
     The ``img_suffix`` is fixed to '_leftImg8bit.png' and ``seg_map_suffix`` is
-    fixed to '_gtFine_labelIds.png' for Concrete Damage Dataset. 
+    fixed to '_gtFine_labelIds.png'. 
 
-    !!!CAUTION!!!
-    The palette is BGR, not RGB
+    Please note that palette is BGR.
     """
 
-    METAINFO = dict(
-        classes=('background', 'efflorescence', 'rebar_exposure', 'spalling', 'corrosion'),
-        palette=[[0, 0, 0], [0, 255, 0], [255, 255, 0], [255, 0, 255], [0, 165, 255]]
-    )
+    METAINFO = dict(classes=('background', 'efflorescence', 'rebar_exposure',
+                             'spalling', 'corrosion'),
+                    palette=[[0, 0, 0], [0, 255, 0], [255, 255, 0],
+                             [255, 0, 255], [0, 165, 255]])
 
     def __init__(self,
                  img_suffix='_leftImg8bit.png',
                  seg_map_suffix='_gtFine_labelIds.png',
                  label_map=None,
                  **kwargs):
-        super(CityscapesDataset, self).__init__(
-            img_suffix=img_suffix, seg_map_suffix=seg_map_suffix, **kwargs)
+        super(CityscapesDataset, self).__init__(img_suffix=img_suffix,
+                                                seg_map_suffix=seg_map_suffix,
+                                                **kwargs)
 
-        if label_map :
+        if label_map:
             self.serialize_data = False
             self.label_map = label_map
             self._metainfo['label_map'] = self.label_map
             self.data_list = self.load_data_list()
-        
+
     def get_cat_ids(self, idx):
         """Get category ids of the idx-th data sample.
         Args:
@@ -49,7 +49,7 @@ class UOSConcreteDamageDataset(CityscapesDataset):
             pass
         else:
             self.get_gt_statistics()
-            
+
         old_cat_ids = self.cat_ids[idx]
         cat_ids = []
 
@@ -63,7 +63,7 @@ class UOSConcreteDamageDataset(CityscapesDataset):
         """Get statistics of ground truth.
         """
 
-        self.cat_ids = []        
+        self.cat_ids = []
         fileclient = FileClient.infer_client(dict(backend='disk'))
 
         for idx in track_iter_progress(range(len(self))):
@@ -72,7 +72,6 @@ class UOSConcreteDamageDataset(CityscapesDataset):
 
             segmap_bytes = fileclient.get(data['seg_map_path'])
             seg_map = mmcv.imfrombytes(
-            segmap_bytes, flag='unchanged').squeeze().astype(np.uint8)
+                segmap_bytes, flag='unchanged').squeeze().astype(np.uint8)
 
             self.cat_ids.append(np.unique(seg_map).tolist())
-

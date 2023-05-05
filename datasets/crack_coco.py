@@ -6,12 +6,8 @@ from mmdet.datasets.coco import CocoDataset
 class ConcreteCrackCOCODataset(CocoDataset):
     """
     Concrete Crack COCO Dataset
-
-    !!!CAUTION!!!
-    The palette is BGR, not RGB
+    
+    Note that palette is BGR.
     """
 
-    METAINFO = {
-        'classes': ('crack', ),
-        'palette': [(0, 0, 255)]
-    }
+    METAINFO = {'classes': ('crack', ), 'palette': [(0, 0, 255)]}

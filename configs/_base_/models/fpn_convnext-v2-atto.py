@@ -1,6 +1,6 @@
 # model settings
 norm_cfg = dict(type='SyncBN', requires_grad=True)
-custom_imports = dict(imports='mmcls.models', allow_failed_imports=False)
+custom_imports = dict(imports='mmpretrain.models', allow_failed_imports=False)
 checkpoint_file = 'https://download.openmmlab.com/mmclassification/v0/convnext-v2/convnext-v2-atto_3rdparty-fcmae_in1k_20230104-07514db4.pth'  
 data_preprocessor = dict(
     type='SegDataPreProcessor',
@@ -14,7 +14,7 @@ model = dict(
     data_preprocessor=data_preprocessor,
     pretrained=None, 
     backbone=dict(
-        type='mmcls.ConvNeXt',
+        type='mmpretrain.ConvNeXt',
         arch='atto',
         out_indices=[0, 1, 2, 3],
         use_grn=True,
@@ -27,11 +27,11 @@ model = dict(
     neck=dict(
         type='FPN',
         in_channels=[40, 80, 160, 320],
-        out_channels=256,
+        out_channels=128,
         num_outs=4),
     decode_head=dict(
         type='FPNHead',
-        in_channels=[256, 256, 256, 256],
+        in_channels=[128, 128, 128, 128],
         in_index=[0, 1, 2, 3],
         feature_strides=[4, 8, 16, 32],
         channels=128,
