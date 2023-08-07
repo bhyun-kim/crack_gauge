@@ -20,7 +20,7 @@ pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --e
 Step 3. Install OpenMMLab dependencies:
 
 Step 3-1. Install OpenMMLab installer, [MIM](https://github.com/open-mmlab/mim):
-    
+
 ```bash
 pip install openmim
 ```
@@ -31,16 +31,16 @@ Step 3-2. Install OpenMMLab dependencies required for your application. For the 
 mim install mmengine
 mim install mmcv
 mim install mmpretrain
-mim install mmsegmentation
-mim install mmdet 
-mim install mmagic
+mim install mmsegmentation 
+mim install mmdet   
+mim install mmagic 
 ```
 
 Step 4. Install from requirements.txt:
-    
+
 ```bash
 pip install -r requirements.txt
-``` 
+```
 
 Step 4. Install Crack-Gauge:
 
@@ -48,12 +48,14 @@ Step 4. Install Crack-Gauge:
 python setup.py develop
 ```
 
-
 ## Additional dependencies for specific applications
 
+
 1. Web Demo powered by Streamlit :
-    
+
 ```bash
 pip install streamlit
 pip install streamlit-image-comparison
 ```
+
+
