@@ -134,6 +134,9 @@ work_dirs/
 # checkpoints
 checkpoints/
 
+# data
+data/
+
 # unnecessary configs 
 configs/kepco
 configs/mmseg/convnext_tiny_fpn_crack_cityscapes.py
