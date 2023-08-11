@@ -41,7 +41,7 @@ model = dict(
     data_preprocessor=data_preprocessor,
     decode_head=dict(
         num_classes=2,
-        loss_decode=dict(class_weight=[1., 5.])))
+        loss_decode=dict(class_weight=[5., 10.])))
 
 # optimizer
 optimizer = dict(type='Adam', lr=0.001, eps=1e-08, weight_decay=0.0005)
