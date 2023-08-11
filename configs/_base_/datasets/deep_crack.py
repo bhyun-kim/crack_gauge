@@ -7,7 +7,7 @@ train_pipeline = [
     dict(
         type='RandomResize',
         scale=(512, 384),
-        ratio_range=(1.0, 2.0),
+        ratio_range=(0.5, 2.0),
         keep_ratio=True),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.99),
     dict(type='RandomFlip', prob=0.5),
