@@ -6,7 +6,7 @@ train_pipeline = [
     dict(type='LoadAnnotations'),
     dict(
         type='RandomResize',
-        scale_factor=1.0,
+        scale=(512, 384),
         ratio_range=(1.0, 2.0),
         keep_ratio=True),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.99),
