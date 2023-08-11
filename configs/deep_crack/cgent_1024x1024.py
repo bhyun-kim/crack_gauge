@@ -6,7 +6,7 @@ _base_ = [
 
 pretrained = 'https://download.openmmlab.com/mmsegmentation/v0.5/cgnet/cgnet_512x1024_60k_cityscapes/cgnet_512x1024_60k_cityscapes_20201101_110254-124ea03b.pth'
 
-crop_size = (512, 512)
+crop_size = (1024, 1024)
 data_preprocessor = dict(size=crop_size)
 
 model = dict(
