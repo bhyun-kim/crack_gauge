@@ -26,7 +26,7 @@ param_scheduler = [
         power=0.9,
         by_epoch=False,
         begin=0,
-        end=20000)
+        end=40000)
 ]
 
 # training schedule for 20k
