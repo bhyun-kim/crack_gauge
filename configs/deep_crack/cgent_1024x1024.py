@@ -41,7 +41,7 @@ model = dict(
     data_preprocessor=data_preprocessor,
     decode_head=dict(
         num_classes=2,
-        loss_decode=dict(class_weight=[10., 20.])))
+        loss_decode=dict(class_weight=[1., 5.])))
 
 # optimizer
 optimizer = dict(type='Adam', lr=0.001, eps=1e-08, weight_decay=0.0005)
@@ -54,11 +54,11 @@ param_scheduler = [
         power=0.9,
         by_epoch=False,
         begin=0,
-        end=40000)
+        end=20000)
 ]
 
 # training schedule for 20k
-train_cfg = dict(type='IterBasedTrainLoop', max_iters=40000, val_interval=2000)
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=20000, val_interval=2000)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 default_hooks = dict(
