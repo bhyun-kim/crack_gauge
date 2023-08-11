@@ -6,7 +6,7 @@ train_pipeline = [
     dict(type='LoadAnnotations'),
     dict(
         type='RandomResize',
-        scale=(512, 512),
+        scale=(512, 384),
         ratio_range=(1.0, 2.0),
         keep_ratio=True),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.99),
@@ -16,7 +16,7 @@ train_pipeline = [
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=(512, 512), keep_ratio=True),
+    dict(type='Resize', scale=(512, 384), keep_ratio=True),
     dict(type='LoadAnnotations'),
     dict(type='PackSegInputs')
 ]
