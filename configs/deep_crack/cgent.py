@@ -6,14 +6,14 @@ _base_ = [
 
 pretrained = 'https://download.openmmlab.com/mmsegmentation/v0.5/cgnet/cgnet_512x1024_60k_cityscapes/cgnet_512x1024_60k_cityscapes_20201101_110254-124ea03b.pth'
 
-crop_size = (2048, 2048)
+crop_size = (512, 512)
 data_preprocessor = dict(size=crop_size)
 
 model = dict(
     data_preprocessor=data_preprocessor,
     decode_head=dict(
         num_classes=2,
-        loss_decode=dict(class_weight=[10., 20.])))
+        loss_decode=dict(class_weight=[1., 3.])))
         
 # optimizer
 optimizer = dict(type='Adam', lr=0.001, eps=1e-08, weight_decay=0.0005)
@@ -30,12 +30,12 @@ param_scheduler = [
 ]
 
 # training schedule for 20k
-train_cfg = dict(type='IterBasedTrainLoop', max_iters=20000, val_interval=2000)
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=40000, val_interval=2000)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
-    logger=dict(type='LoggerHook', interval=50, log_metric_by_epoch=False),
+    logger=dict(type='LoggerHook', interval=200, log_metric_by_epoch=False),
     param_scheduler=dict(type='ParamSchedulerHook'),
     checkpoint=dict(type='CheckpointHook', by_epoch=False, interval=2000),
     sampler_seed=dict(type='DistSamplerSeedHook'),
