@@ -6,15 +6,43 @@ _base_ = [
 
 pretrained = 'https://download.openmmlab.com/mmsegmentation/v0.5/cgnet/cgnet_512x1024_60k_cityscapes/cgnet_512x1024_60k_cityscapes_20201101_110254-124ea03b.pth'
 
-crop_size = (512, 512)
+crop_size = (1024, 1024)
 data_preprocessor = dict(size=crop_size)
+
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(
+        type='RandomResize',
+        scale=(1024, 768),
+        ratio_range=(0.5, 2.0),
+        keep_ratio=True),
+    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.99),
+    dict(type='RandomFlip', prob=0.5),
+    dict(type='PhotoMetricDistortion'),
+    dict(type='PackSegInputs')
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale_factor=2.0, keep_ratio=True),
+    dict(type='LoadAnnotations'),
+    dict(type='PackSegInputs')
+]
+train_dataloader = dict(
+    dataset=dict(pipeline=train_pipeline)
+)
+val_dataloader = dict(
+    dataset=dict(pipeline=test_pipeline)
+)
+test_dataloader = val_dataloader
+
 
 model = dict(
     data_preprocessor=data_preprocessor,
     decode_head=dict(
         num_classes=2,
-        loss_decode=dict(class_weight=[10., 20.])))
-        
+        loss_decode=dict(class_weight=[5., 10.])))
+
 # optimizer
 optimizer = dict(type='Adam', lr=0.001, eps=1e-08, weight_decay=0.0005)
 optim_wrapper = dict(type='OptimWrapper', optimizer=optimizer)
@@ -26,11 +54,11 @@ param_scheduler = [
         power=0.9,
         by_epoch=False,
         begin=0,
-        end=40000)
+        end=20000)
 ]
 
 # training schedule for 20k
-train_cfg = dict(type='IterBasedTrainLoop', max_iters=40000, val_interval=2000)
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=20000, val_interval=2000)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 default_hooks = dict(
