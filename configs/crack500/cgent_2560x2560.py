@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/deep_crack.py',
+    '../_base_/datasets/crack500.py',
     '../_base_/models/cgnet.py', 
     '../_base_/segmentor_runtime.py'
 ]
