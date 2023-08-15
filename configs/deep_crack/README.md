@@ -15,6 +15,6 @@ Automatic crack detection from images of various scenes is a useful and challeng
 ### DeepCrack
 
 
-| Method | Backbone | Crop<br />Size | Lr schd | Mem<br />(GB) | Inf<br />time<br />(fps) | Device | mIoU | config | download |
-| :------: | ---------- | :--------------- | --------- | --------------- | -------------------------- | -------- | ------ | -------- | ---------- |
-| CGNet | M3N21    | 1024×1024     |         |               |                          |        |      |        |          |
+| Method | Backbone | Crop<br />Size | Lr schd | Mem<br />(GB) | Inf<br />time<br />(fps) | Device | mIoU  | config             | download                                                                                                                                                                                                                                                                                                                                                         |
+| :------: | ---------- | :--------------- | --------- | --------------- | -------------------------- | -------- | ------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CGNet | M3N21    | 1024×1024     | 20000   | -             | -                        | A100   | 86.59 | [config](https://) | [model](https://www.dropbox.com/scl/fi/9j4nkxf0u7yg6pmy3ddq0/iter_14000.pth?rlkey=m7a3q3g32wdsdc1e74rsxjq3c&dl=0https:/), [log](https://www.dropbox.com/scl/fi/zyv3fggf8wgwqvcxj97ry/20230811_223219.log?rlkey=eh3z0rg8ez3rweoz4zmnmpv4c&dl=0https:/****), [colab](https://colab.research.google.com/drive/1DiUZdVIhjLCmQfOm2o7qI9eKzaGOxGC9?usp=sharinghttps:/) |

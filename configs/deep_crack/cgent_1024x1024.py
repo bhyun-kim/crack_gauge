@@ -29,6 +29,7 @@ test_pipeline = [
     dict(type='PackSegInputs')
 ]
 train_dataloader = dict(
+    batch_size=16,
     dataset=dict(pipeline=train_pipeline)
 )
 val_dataloader = dict(
