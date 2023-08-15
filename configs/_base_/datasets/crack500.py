@@ -1,5 +1,5 @@
 dataset_type = 'CRACK500Dataset'
-data_root = 'data/crack500/'
+data_root = 'data/CRACK500/'
 crop_size = (2560, 2560)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -21,14 +21,14 @@ test_pipeline = [
     dict(type='PackSegInputs')
 ]
 train_dataloader = dict(
-    batch_size=2,
+    batch_size=4,
     num_workers=2,
     sampler=dict(type='InfiniteSampler', shuffle=True),
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
         data_prefix=dict(
-            img_path='train_img', seg_map_path='train_lab'),
+            img_path='traindata', seg_map_path='traindata'),
         pipeline=train_pipeline))
 val_dataloader = dict(
     batch_size=1,
@@ -39,9 +39,19 @@ val_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         data_prefix=dict(
-            img_path='test_img', seg_map_path='test_lab'),
+            img_path='valdata', seg_map_path='valdata'),
         pipeline=test_pipeline))
-test_dataloader = val_dataloader
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        data_prefix=dict(
+            img_path= 'testdata', seg_map_path='tesdata'),
+        pipeline=test_pipeline))
 
 val_evaluator = dict(type='IoUMetric', iou_metrics=['mIoU'])
 test_evaluator = val_evaluator
